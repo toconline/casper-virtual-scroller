@@ -33,6 +33,9 @@ class CasperVirtualScroller extends LitElement {
       renderLine: {
         type: Function
       },
+      renderNoItems: {
+        type: Function
+      },
       height: {
         type: Number
       },
@@ -69,6 +72,7 @@ class CasperVirtualScroller extends LitElement {
     this.addEventListener('scroll', (event) => { this._onScroll(event) });
 
     this._renderLine = this.unsafeRender ? this._renderLineUnsafe : this._renderLineSafe;
+    this.renderNoItems = this.renderNoItems || this._renderNoItems;
     this.renderPlaceholder = (this.renderPlaceholder || this._renderPlaceholder);
   }
 
@@ -219,14 +223,6 @@ class CasperVirtualScroller extends LitElement {
         padding: 5px 5px 5px 10px;
         white-space: nowrap;
       }
-      .item-row:hover {
-        background-color: gray;
-        color: white;
-        cursor: pointer;
-      }
-      .item-row[active] {
-        background-color: yellow;
-      }
     `
   }
 
@@ -261,7 +257,7 @@ class CasperVirtualScroller extends LitElement {
         }
       </style>
       <div class="placeholder-row">
-        A carregar dados!
+        Loading data!
       </div>
     `;
   }
@@ -291,7 +287,13 @@ class CasperVirtualScroller extends LitElement {
 
   _renderNoItems () {
     return html `
-      <p>No item</p>
+      <style>
+        .no-item-div {
+          text-align: center;
+          padding: 20px;
+        }
+      </style>
+      <div class="no-item-div">No items</div>
     `
   }
 
