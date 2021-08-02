@@ -48,6 +48,9 @@ class CasperVirtualScroller extends LitElement {
       delaySetup: {
         type: Boolean
       },
+      loading: {
+        type: Boolean
+      },
       _currentRow: {
         type: Number,
         attribute: false
@@ -297,6 +300,35 @@ class CasperVirtualScroller extends LitElement {
     `
   }
 
+  _renderLoading () {
+    return html `
+      <style>
+        .spinner-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100%;
+          padding: 20px;
+          min-width: 150px;
+          min-height: 100px;
+        }
+        .spinner {
+          --paper-spinner-stroke-width: 5px;
+          --paper-spinner-layer-1-color: var(--primary-color);
+          --paper-spinner-layer-2-color: var(--primary-color);
+          --paper-spinner-layer-3-color: var(--primary-color);
+          --paper-spinner-layer-4-color: var(--primary-color);
+          width: 60px;
+          height: 60px;
+        }
+      </style>
+
+      <div class="spinner-container">
+        <paper-spinner class="spinner" active></paper-spinner>
+      </div>
+    `
+  }
+
   _lineClicked (item, event) {
     this.dispatchEvent(new CustomEvent('cvs-line-clicked', {
       bubbles: true,
@@ -337,6 +369,12 @@ class CasperVirtualScroller extends LitElement {
 
   render () {
     console.log('render');
+
+    if(this.loading) {
+      // Loading render spinner
+      return this._renderLoading();
+    }
+
     if (this.dataSize === 0 || (this._cvsItems && this._cvsItems.length === 0)) {
       // No items
       return this._renderNoItems();
@@ -407,6 +445,7 @@ class CasperVirtualScroller extends LitElement {
           height: ${((this.dataSize - listSize - this._currentRow) * this._rowHeight) + 'px'};
         }
       </style>
+
       <div class="top-padding"></div>
         ${repeat(this._itemList, a => a.listId, this._renderLine.bind(this))}
       <div class="bottom-padding"></div>

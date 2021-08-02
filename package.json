@@ -11,6 +11,7 @@
     "start:watch": "web-dev-server --open demo/ --node-resolve --watch"
   },
   "dependencies": {
+    "@polymer/paper-spinner": "^3.x",
     "lit": "^2.0.0-rc.2"
   },
   "devDependencies": {
