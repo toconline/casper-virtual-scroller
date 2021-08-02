@@ -1,6 +1,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import '@polymer/paper-spinner/paper-spinner.js';
 
 class CasperVirtualScroller extends LitElement {
 
