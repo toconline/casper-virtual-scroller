@@ -59,6 +59,10 @@ class CasperVirtualScroller extends LitElement {
       _cvsItems: {
         type: Array,
         attribute: false
+      },
+      _setupDone: {
+        type: Boolean,
+        attribute: false
       }
     }
   }
@@ -78,6 +82,7 @@ class CasperVirtualScroller extends LitElement {
     this._renderLine = this.unsafeRender ? this._renderLineUnsafe : this._renderLineSafe;
     this.renderNoItems = this.renderNoItems || this._renderNoItems;
     this.renderPlaceholder = (this.renderPlaceholder || this._renderPlaceholder);
+    this._setupDone = false;
   }
 
   updated (changedProperties) {
@@ -92,7 +97,7 @@ class CasperVirtualScroller extends LitElement {
     this._currentRow = 0;
     this._rowHeight = -1;
     this._setupDone = false;
-    if (this.dataSize === undefined) this.dataSize = this.items.length;
+    if (this.dataSize === undefined || this.dataSize === 0) this.dataSize = this.items.length;
 
     this._cvsItems = JSON.parse(JSON.stringify(this.items));
     const offset = (this.startIndex || 0);
@@ -120,6 +125,8 @@ class CasperVirtualScroller extends LitElement {
     this._currentRow = Math.max(0, Math.min(this.dataSize, Math.round(this.scrollTop / this._rowHeight)));
 
     this._wrapperHeight = Math.min(this._rowHeight*this.items.length, this._wrapperHeight);
+
+    this._setupDone = true;
 
     this.requestUpdate();
 
@@ -294,7 +301,8 @@ class CasperVirtualScroller extends LitElement {
       <style>
         .no-item-div {
           text-align: center;
-          padding: 20px;
+          padding: 15px;
+          font-size: 13px;
         }
       </style>
       <div class="no-item-div">No items</div>
@@ -388,7 +396,6 @@ class CasperVirtualScroller extends LitElement {
 
     if (this._setupDone === false) {
       // Initial render to setup scroll height
-      this._setupDone = true;
       return this._renderContainerWithoutItems();
     }
 
