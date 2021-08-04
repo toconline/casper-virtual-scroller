@@ -339,7 +339,7 @@ class CasperVirtualScroller extends LitElement {
   }
 
   _lineClicked (item, event) {
-    this.dispatchEvent(new CustomEvent('cvs-line-clicked', {
+    this.dispatchEvent(new CustomEvent('cvs-line-selected', {
       bubbles: true,
       composed: true,
       detail: {
@@ -347,6 +347,61 @@ class CasperVirtualScroller extends LitElement {
         name: item[this.textProp]
       }
     }));
+  }
+
+  async _moveSelection (dir) {
+    if (dir && this._itemList && this._itemList.length > 0) {
+      if (this.selectedItem === undefined) {
+        this.selectedItem = this._itemList[0].id;
+      } else {
+        let selectedIdx = 0;
+        for (let idx = 0; idx < this._itemList.length; idx++) {
+          if (this.selectedItem == this._itemList[idx].id) {
+            selectedIdx = idx;
+            break;
+          }
+        }
+        if (dir === 'up' && this._itemList[selectedIdx].listId - 1 > -1) {
+          this.scrollTop -= this._rowHeight;
+          if (this._itemList[selectedIdx-1]) this.selectedItem = this._itemList[selectedIdx-1].id;
+        } else if (dir === 'down' && this._itemList[selectedIdx].listId + 1 <= this.dataSize-1) {
+          if (selectedIdx+1 > 1)  this.scrollTop += this._rowHeight;
+          if (this._itemList[selectedIdx+1]) this.selectedItem = this._itemList[selectedIdx+1].id;
+        }
+      }
+    }
+  }
+
+  _confirmSelection () {
+    if (this.selectedItem && this._itemList) {
+      this.dispatchEvent(new CustomEvent('cvs-line-selected', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          id: this.selectedItem,
+          name: this._itemList.filter(e => e.id == this.selectedItem)[0][this.textProp]
+        }
+      }));
+    }
+  }
+
+  _handleKeyPress (event) {
+    switch (event.key) {
+      case 'ArrowUp':
+        this._moveSelection('up');
+        break;
+      case 'ArrowDown':
+        this._moveSelection('down');
+        break;
+      case 'Tab':
+        this._confirmSelection();
+        break;
+      case 'Enter':
+        this._confirmSelection();
+        break;
+      default:
+        break;
+    }
   }
 
   _itemsBinarySearch (id) {
@@ -374,6 +429,8 @@ class CasperVirtualScroller extends LitElement {
     if (!this.delaySetup) {
       this.initialSetup();
     }
+
+    this.addEventListener('keydown', this._handleKeyPress.bind(this));
   }
 
   render () {
