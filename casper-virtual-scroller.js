@@ -1,7 +1,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
-import '@polymer/paper-spinner/paper-spinner.js';
+import 'wc-spinners/dist/spring-spinner.js';
 
 class CasperVirtualScroller extends LitElement {
 
@@ -322,18 +322,14 @@ class CasperVirtualScroller extends LitElement {
           min-height: 100px;
         }
         .spinner {
-          --paper-spinner-stroke-width: 5px;
-          --paper-spinner-layer-1-color: var(--primary-color);
-          --paper-spinner-layer-2-color: var(--primary-color);
-          --paper-spinner-layer-3-color: var(--primary-color);
-          --paper-spinner-layer-4-color: var(--primary-color);
-          width: 60px;
-          height: 60px;
+          --spring-spinner__color: var(--primary-color);
+          --spring-spinner__duration: 1.2s;
+          --spring-spinner__size: 60px;
         }
       </style>
 
       <div class="spinner-container">
-        <paper-spinner class="spinner" active></paper-spinner>
+        <spring-spinner class="spinner"></spring-spinner>
       </div>
     `
   }
