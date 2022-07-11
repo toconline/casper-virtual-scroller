@@ -340,7 +340,8 @@ class CasperVirtualScroller extends LitElement {
       composed: true,
       detail: {
         id: item[this.idProp],
-        name: item[this.textProp]
+        name: item[this.textProp],
+        item: item
       }
     }));
   }
