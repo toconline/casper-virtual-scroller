@@ -371,12 +371,14 @@ class CasperVirtualScroller extends LitElement {
 
   _confirmSelection () {
     if (this.selectedItem && this._itemList) {
+      const item = this._itemList.filter(e => e.id == this.selectedItem)?.[0];
       this.dispatchEvent(new CustomEvent('cvs-line-selected', {
         bubbles: true,
         composed: true,
         detail: {
           id: this.selectedItem,
-          name: this._itemList.filter(e => e.id == this.selectedItem)[0][this.textProp]
+          name: item?.[this.textProp],
+          item: item
         }
       }));
     }
