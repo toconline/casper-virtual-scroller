@@ -85,6 +85,99 @@ class CasperVirtualScroller extends LitElement {
     this._setupDone = false;
   }
 
+  //***************************************************************************************//
+  //                                ~~~ LIT life cycle ~~~                                 //
+  //***************************************************************************************//
+
+  render () {
+    if(this.loading) {
+      // Loading render spinner
+      return this._renderLoading();
+    }
+
+    if (this.dataSize === 0 || (this._cvsItems && this._cvsItems.length === 0)) {
+      // No items
+      return this._renderNoItems();
+    }
+
+    if (this._rowHeight === -1) {
+      // Initial render to calculate row height
+      return this._renderLine(this._cvsItems[0]);
+    }
+
+    if (this._setupDone === false) {
+      // Initial render to setup scroll height
+      return this._renderContainerWithoutItems();
+    }
+
+    // Initial stuff done... Now do real work
+
+    // List size cant be bigger than dataSize
+    const listSize = Math.min(this.dataSize, Math.round(this._wrapperHeight / this._rowHeight));
+    if (!listSize) return;
+
+    // Current row cant go higher than this.dataSize-listSize and lower than 0
+    this._currentRow = Math.max(0, Math.min(this._currentRow,this.dataSize-listSize));
+
+    this._itemList = [];
+    let hasPlaceholders = false;
+
+    // We might need to optimize this... O((log2*this._cvsItems.length)*listSize)
+    for (let idx = 0; idx < listSize; idx++) {
+      // Check if the item exists
+      const elementIdx = this._itemsBinarySearch(this._currentRow + idx);
+      if (elementIdx > -1) {
+        // Item exists - render it
+        this._itemList[idx] = this._cvsItems[elementIdx];
+      } else {
+        // Item does not exist - render placeholder
+        hasPlaceholders = true;
+        this._itemList[idx] = { listId: this._currentRow + idx, placeholder: true };
+      }
+    }
+
+    // Request new items if we find a placeholder
+    if (hasPlaceholders) {
+      const placeholderPositions = this._itemList.filter(e => e.placeholder);
+      this.dispatchEvent(new CustomEvent('cvs-request-items', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          direction: this._scrollDirection,
+          index: this._scrollDirection === 'up' ? placeholderPositions[placeholderPositions.length-1].listId : placeholderPositions[0].listId
+        }
+      }));
+    }
+
+    return html`
+      <style>
+        :host {
+          display: block;
+          overflow: auto;
+          width: ${this.width ? (this.width+'px') : 'fit-content'};
+          height: ${(this._rowHeight * listSize) + 'px'};
+        }
+        :host .top-padding {
+          height: ${(this._currentRow * this._rowHeight) + 'px'};
+        }
+        :host .bottom-padding {
+          height: ${((this.dataSize - listSize - this._currentRow) * this._rowHeight) + 'px'};
+        }
+      </style>
+
+      <div class="top-padding"></div>
+        ${repeat(this._itemList, a => a.listId, this._renderLine.bind(this))}
+      <div class="bottom-padding"></div>
+    `;
+  }
+
+  firstUpdated () {
+    if (!this.delaySetup) {
+      this.initialSetup();
+    }
+    this.addEventListener('keydown', this._handleKeyPress.bind(this));
+  }
+
   updated (changedProperties) {
     if (changedProperties.has('items') && changedProperties.get('items') !== undefined) {
       if (JSON.stringify(this.items) !== JSON.stringify(changedProperties.get('items'))) {
@@ -92,6 +185,10 @@ class CasperVirtualScroller extends LitElement {
       }
     }
   }
+
+  //***************************************************************************************//
+  //                               ~~~ Public functions~~~                                 //
+  //***************************************************************************************//
 
   async initialSetup () {
     this._currentRow = 0;
@@ -206,6 +303,10 @@ class CasperVirtualScroller extends LitElement {
       }
     }
   }
+
+  //***************************************************************************************//
+  //                              ~~~ Private functions~~~                                 //
+  //***************************************************************************************//
 
   _onScroll (event) {
     if (this._scrollTicking) {
@@ -422,98 +523,6 @@ class CasperVirtualScroller extends LitElement {
     }
 	  // id wasn't found
     return -1;
-  }
-
-  firstUpdated () {
-    if (!this.delaySetup) {
-      this.initialSetup();
-    }
-
-    this.addEventListener('keydown', this._handleKeyPress.bind(this));
-  }
-
-  render () {
-    console.log('render');
-
-    if(this.loading) {
-      // Loading render spinner
-      return this._renderLoading();
-    }
-
-    if (this.dataSize === 0 || (this._cvsItems && this._cvsItems.length === 0)) {
-      // No items
-      return this._renderNoItems();
-    }
-
-    if (this._rowHeight === -1) {
-      // Initial render to calculate row height
-      return this._renderLine(this._cvsItems[0]);
-    }
-
-    if (this._setupDone === false) {
-      // Initial render to setup scroll height
-      return this._renderContainerWithoutItems();
-    }
-
-    // Initial stuff done... Now do real work
-
-    // List size cant be bigger than dataSize
-    const listSize = Math.min(this.dataSize, Math.round(this._wrapperHeight / this._rowHeight));
-    if (!listSize) return;
-
-    // Current row cant go higher than this.dataSize-listSize and lower than 0
-    this._currentRow = Math.max(0, Math.min(this._currentRow,this.dataSize-listSize));
-
-    this._itemList = [];
-    let hasPlaceholders = false;
-
-    // We might need to optimize this... O((log2*this._cvsItems.length)*listSize)
-    for (let idx = 0; idx < listSize; idx++) {
-      // Check if the item exists
-      const elementIdx = this._itemsBinarySearch(this._currentRow + idx);
-      if (elementIdx > -1) {
-        // Item exists - render it
-        this._itemList[idx] = this._cvsItems[elementIdx];
-      } else {
-        // Item does not exist - render placeholder
-        hasPlaceholders = true;
-        this._itemList[idx] = { listId: this._currentRow + idx, placeholder: true };
-      }
-    }
-
-    // Request new items if we find a placeholder
-    if (hasPlaceholders) {
-      const placeholderPositions = this._itemList.filter(e => e.placeholder);
-      this.dispatchEvent(new CustomEvent('cvs-request-items', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          direction: this._scrollDirection,
-          index: this._scrollDirection === 'up' ? placeholderPositions[placeholderPositions.length-1].listId : placeholderPositions[0].listId
-        }
-      }));
-    }
-
-    return html`
-      <style>
-        :host {
-          display: block;
-          overflow: auto;
-          width: ${this.width ? (this.width+'px') : 'fit-content'};
-          height: ${(this._rowHeight * listSize) + 'px'};
-        }
-        :host .top-padding {
-          height: ${(this._currentRow * this._rowHeight) + 'px'};
-        }
-        :host .bottom-padding {
-          height: ${((this.dataSize - listSize - this._currentRow) * this._rowHeight) + 'px'};
-        }
-      </style>
-
-      <div class="top-padding"></div>
-        ${repeat(this._itemList, a => a.listId, this._renderLine.bind(this))}
-      <div class="bottom-padding"></div>
-    `;
   }
 }
 
