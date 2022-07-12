@@ -52,6 +52,9 @@ class CasperVirtualScroller extends LitElement {
       loading: {
         type: Boolean
       },
+      unlistedItem: {
+        type: Object
+      },
       _currentRow: {
         type: Number,
         attribute: false
@@ -96,8 +99,13 @@ class CasperVirtualScroller extends LitElement {
     }
 
     if (this.dataSize === 0 || (this._cvsItems && this._cvsItems.length === 0)) {
-      // No items
-      return this._renderNoItems();
+      if (this.unlistedItem) {
+        // Only render unlisted item
+        return this._renderUnlisted();
+      } else {
+        // No items
+        return this.renderNoItems();
+      }
     }
 
     if (this._rowHeight === -1) {
@@ -155,7 +163,7 @@ class CasperVirtualScroller extends LitElement {
           display: block;
           overflow: auto;
           width: ${this.width ? (this.width+'px') : 'fit-content'};
-          height: ${(this._rowHeight * listSize) + 'px'};
+          height: ${(this._rowHeight * (listSize + (this.unlistedItem ? 1 : 0))) + 'px'};
         }
         :host .top-padding {
           height: ${(this._currentRow * this._rowHeight) + 'px'};
@@ -165,6 +173,7 @@ class CasperVirtualScroller extends LitElement {
         }
       </style>
 
+      ${this.unlistedItem ? this._renderLine(this.unlistedItem) : ''}
       <div class="top-padding"></div>
         ${repeat(this._itemList, a => a.listId, this._renderLine.bind(this))}
       <div class="bottom-padding"></div>
@@ -433,6 +442,20 @@ class CasperVirtualScroller extends LitElement {
         <spring-spinner class="spinner"></spring-spinner>
       </div>
     `
+  }
+
+  _renderUnlisted () {
+    return html`
+      <style>
+        :host {
+          display: block;
+          overflow: auto;
+          width: ${this.width ? (this.width+'px') : 'fit-content'};
+          height: ${this._rowHeight + 'px'};
+        }  
+      </style>
+      ${this._renderLine(this.unlistedItem)}
+    `;
   }
 
   _lineClicked (item, event) {
