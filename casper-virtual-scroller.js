@@ -98,6 +98,8 @@ class CasperVirtualScroller extends LitElement {
       return this._renderLoading();
     }
 
+    this._itemList = [];
+
     if (this.dataSize === 0 || (this._cvsItems && this._cvsItems.length === 0)) {
       if (this.unlistedItem) {
         // Only render unlisted item
@@ -127,7 +129,6 @@ class CasperVirtualScroller extends LitElement {
     // Current row cant go higher than this.dataSize-listSize and lower than 0
     this._currentRow = Math.max(0, Math.min(this._currentRow,this.dataSize-listSize));
 
-    this._itemList = [];
     let hasPlaceholders = false;
 
     // We might need to optimize this... O((log2*this._cvsItems.length)*listSize)
@@ -173,10 +174,10 @@ class CasperVirtualScroller extends LitElement {
         }
       </style>
 
-      ${this.unlistedItem ? this._renderLine(this.unlistedItem) : ''}
       <div class="top-padding"></div>
         ${repeat(this._itemList, a => a.listId, this._renderLine.bind(this))}
       <div class="bottom-padding"></div>
+      ${this.unlistedItem ? this._renderLine(this.unlistedItem) : ''}
     `;
   }
 
@@ -471,36 +472,52 @@ class CasperVirtualScroller extends LitElement {
   }
 
   async _moveSelection (dir) {
-    if (dir && this._itemList && this._itemList.length > 0) {
-      if (this.selectedItem === undefined) {
-        this.selectedItem = this._itemList[0].id;
+    const tmpItemList = JSON.parse(JSON.stringify(this._itemList));
+
+    let listHasUnlisted = false
+    if (this.unlistedItem && (!tmpItemList || tmpItemList.length === 0 || tmpItemList[tmpItemList.length-1].listId >= this.dataSize-1) )  {
+      listHasUnlisted = true;
+      tmpItemList.push(this.unlistedItem);
+    }
+
+    if (dir && tmpItemList && tmpItemList.length > 0) {
+      if (this.selectedItem === undefined || tmpItemList.filter(e => e.id == this.selectedItem).length === 0) {
+        this.selectedItem = tmpItemList[0].id;
       } else {
         let selectedIdx = 0;
-        for (let idx = 0; idx < this._itemList.length; idx++) {
-          if (this.selectedItem == this._itemList[idx].id) {
+        for (let idx = 0; idx < tmpItemList.length; idx++) {
+          if (this.selectedItem == tmpItemList[idx].id) {
             selectedIdx = idx;
             break;
           }
         }
-        if (dir === 'up' && this._itemList[selectedIdx].listId - 1 > -1) {
+        if (dir === 'up' && (tmpItemList[selectedIdx].listId - 1 > -1 || this.unlistedItem)) {
           this.scrollTop -= this._rowHeight;
-          if (this._itemList[selectedIdx-1]) this.selectedItem = this._itemList[selectedIdx-1].id;
-        } else if (dir === 'down' && this._itemList[selectedIdx].listId + 1 <= this.dataSize-1) {
+          if (tmpItemList[selectedIdx-1]) this.selectedItem = tmpItemList[selectedIdx-1].id;
+        } else if (dir === 'down' && (tmpItemList[selectedIdx].listId + 1 <= this.dataSize-1 || this.unlistedItem)) {
           if (selectedIdx+1 > 1)  this.scrollTop += this._rowHeight;
-          if (this._itemList[selectedIdx+1]) this.selectedItem = this._itemList[selectedIdx+1].id;
-        }
+          if (tmpItemList[selectedIdx+1]) this.selectedItem = tmpItemList[selectedIdx+1].id;
+        } 
       }
     }
   }
 
   _confirmSelection () {
-    if (this.selectedItem && this._itemList) {
-      const item = this._itemList.filter(e => e.id == this.selectedItem)?.[0];
+    let item;
+    if (this._itemList.length === 1) {
+      item = this._itemList[0];
+    } else if (this.selectedItem && this._itemList) {
+      item = this._itemList.filter(e => e.id == this.selectedItem)?.[0];
+    }
+    
+    if (!item && this.unlistedItem) item = this.unlistedItem;
+
+    if (item) {
       this.dispatchEvent(new CustomEvent('cvs-line-selected', {
         bubbles: true,
         composed: true,
         detail: {
-          id: this.selectedItem,
+          id: item.id,
           name: item?.[this.textProp],
           item: item
         }
