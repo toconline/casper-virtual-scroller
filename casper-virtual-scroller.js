@@ -196,6 +196,15 @@ class CasperVirtualScroller extends LitElement {
     }
   }
 
+  async getUpdateComplete () {
+    await super.getUpdateComplete();
+
+    // Wait for all the rows to render
+    const rows = Array.from(this.shadowRoot.querySelectorAll('.item-row'));
+    await Promise.all(rows.map(el => el.updateComplete));
+    return true;
+  }
+
   //***************************************************************************************//
   //                               ~~~ Public functions~~~                                 //
   //***************************************************************************************//
