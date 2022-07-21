@@ -512,12 +512,7 @@ class CasperVirtualScroller extends LitElement {
   }
 
   _confirmSelection () {
-    let item;
-    if (this._itemList.length === 1) {
-      item = this._itemList[0];
-    } else if (this.selectedItem && this._itemList) {
-      item = this._itemList.filter(e => e.id == this.selectedItem)?.[0];
-    }
+    let item = this._itemList.filter(e => e.id == this.selectedItem)?.[0];
     
     if (!item && this.unlistedItem) item = this.unlistedItem;
 
