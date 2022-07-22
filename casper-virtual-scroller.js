@@ -7,9 +7,7 @@ class CasperVirtualScroller extends LitElement {
 
   static get properties() {
     return {
-      items: {
-        type: Array
-      },
+      items: {},
       startIndex: {
         type: Number
       },
@@ -69,6 +67,18 @@ class CasperVirtualScroller extends LitElement {
       }
     }
   }
+
+  _items = [];
+  set items(val) {
+    let oldVal = this._items;
+    if (Array.isArray(val)) {
+      this._items = val;
+    } else {
+      this._items = [];  
+    }
+    this.requestUpdate('items', oldVal);
+  }
+  get items() { return this._items; }
 
   constructor () {
     super();
