@@ -68,6 +68,49 @@ class CasperVirtualScroller extends LitElement {
     }
   }
 
+  static styles = css`
+    :host {
+      display: block;
+      overflow: auto;
+    }
+
+    .cvs__wrapper {
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .cvs__no-items {
+      text-align: center;
+      padding: 15px;
+      font-size: 13px;
+    }
+
+    .cvs__placeholder {
+      filter: blur(3px);
+    }
+
+    .cvs__item-row {
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+
+    .cvs__item-row:hover {
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+    }
+
+    .cvs__item-row[active] {
+      background-color: var(--dark-primary-color);
+      color: white;
+    }
+    
+    .cvs__item-row[active]:hover {
+      background-color: var(--primary-color);
+    }
+  `;
+
   _items = [];
   set items(val) {
     let oldVal = this._items;
@@ -171,23 +214,23 @@ class CasperVirtualScroller extends LitElement {
     return html`
       <style>
         :host {
-          display: block;
-          overflow: auto;
           width: ${this.width ? (this.width+'px') : 'fit-content'};
           height: ${(this._rowHeight * (listSize + (this.unlistedItem ? 1 : 0))) + 'px'};
         }
-        :host .top-padding {
+        .cvs__top-padding {
           height: ${(this._currentRow * this._rowHeight) + 'px'};
         }
-        :host .bottom-padding {
+        .cvs__bottom-padding {
           height: ${((this.dataSize - listSize - this._currentRow) * this._rowHeight) + 'px'};
         }
       </style>
 
-      <div class="top-padding"></div>
-        ${repeat(this._itemList, a => a.listId, this._renderLine.bind(this))}
-      <div class="bottom-padding"></div>
-      ${this.unlistedItem ? this._renderLine(this.unlistedItem) : ''}
+      <div class="cvs__wrapper">
+        <div class="cvs__top-padding"></div>
+          ${repeat(this._itemList, a => a.listId, this._renderLine.bind(this))}
+        <div class="cvs__bottom-padding"></div>
+        ${this.unlistedItem ? this._renderLine(this.unlistedItem) : ''}
+      </div>
     `;
   }
 
@@ -210,7 +253,7 @@ class CasperVirtualScroller extends LitElement {
     await super.getUpdateComplete();
 
     // Wait for all the rows to render
-    const rows = Array.from(this.shadowRoot.querySelectorAll('.item-row'));
+    const rows = Array.from(this.shadowRoot.querySelectorAll('.cvs__item-row'));
     await Promise.all(rows.map(el => el.updateComplete));
     return true;
   }
@@ -239,7 +282,7 @@ class CasperVirtualScroller extends LitElement {
 
     await this.updateComplete;
 
-    this._rowHeight = this.shadowRoot.querySelector('.item-row').getBoundingClientRect().height;
+    this._rowHeight = this.shadowRoot.querySelector('.cvs__item-row').getBoundingClientRect().height;
 
     this.requestUpdate();
 
@@ -358,22 +401,12 @@ class CasperVirtualScroller extends LitElement {
     this._oldScrollTop = this.scrollTop;
   }
 
-  _lineCommonStyle () {
-    return css`
-      .item-row {
-        padding: 5px 5px 5px 10px;
-        white-space: nowrap;
-      }
-    `
-  }
-
   _renderLineUnsafe (item) {
     return html`
       <style>
-        ${this._lineCommonStyle()}
         ${this.lineCss ? unsafeCSS(this.lineCss) : ''}
       </style>
-      <div class="item-row" @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}">
+      <div class="cvs__item-row" @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}">
         ${item.unsafeHTML ? unsafeHTML(item.unsafeHTML) : this.renderPlaceholder() }
       </div>
     `;
@@ -381,10 +414,7 @@ class CasperVirtualScroller extends LitElement {
 
   _renderLineSafe (item) {
     return html`
-      <style>
-        ${this._lineCommonStyle()}
-      </style>
-      <div class="item-row" @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}">
+      <div class="cvs__item-row" @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}">
         ${this.renderLine ? this.renderLine(item) : (item[this.textProp] ? item[this.textProp] : this.renderPlaceholder()) }
       </div>
     `;
@@ -392,12 +422,7 @@ class CasperVirtualScroller extends LitElement {
 
   _renderPlaceholder () {
     return html`
-      <style>
-        .placeholder-row {
-          filter: blur(3px);
-        }
-      </style>
-      <div class="placeholder-row">
+      <div class="cvs__placeholder">
         Loading data!
       </div>
     `;
@@ -409,34 +434,25 @@ class CasperVirtualScroller extends LitElement {
     return html`
       <style>
         :host {
-          display: block;
-          overflow: auto;
           width: ${this.width ? (this.width+'px') : 'fit-content'};
           height: ${(this._rowHeight * listSize) + 'px'};
         }
-        :host .top-padding {
+        .cvs__top-padding {
           height: ${(this._currentRow * this._rowHeight) + 'px'};
         }
-        :host .bottom-padding {
+        .cvs__bottom-padding {
           height: ${(((this.dataSize - listSize - this._currentRow) * this._rowHeight) + this._wrapperHeight) + 'px'};
         }
       </style>
-      <div class="top-padding"></div>
-      <div class="bottom-padding"></div>
+      <div class="cvs__top-padding"></div>
+      <div class="cvs__bottom-padding"></div>
     `;
   }
 
   _renderNoItems () {
     return html `
-      <style>
-        .no-item-div {
-          text-align: center;
-          padding: 15px;
-          font-size: 13px;
-        }
-      </style>
-      <div class="no-item-div">No items</div>
-    `
+      <div class="cvs__no-items">Sem resultados</div>
+    `;
   }
 
   _renderLoading () {
@@ -468,8 +484,6 @@ class CasperVirtualScroller extends LitElement {
     return html`
       <style>
         :host {
-          display: block;
-          overflow: auto;
           width: ${this.width ? (this.width+'px') : 'fit-content'};
           height: ${this._rowHeight + 'px'};
         }  
