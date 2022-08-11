@@ -72,22 +72,22 @@ class CasperVirtualScroller extends LitElement {
     :host {
       display: block;
       overflow: auto;
+      border: 1px solid #AAA;
+      background-color: white;
+      border-radius: 0 0 3px 3px;
+      transition: width 250ms linear;
+      box-shadow: rgb(25 59 103 / 5%) 0px 0px 0px 1px, rgb(28 55 90 / 16%) 0px 2px 6px -1px, rgb(28 50 79 / 38%) 0px 8px 24px -4px;
     }
 
     .cvs__wrapper {
-      display: inline-block;
-      overflow: hidden;
+      display: grid;
       white-space: nowrap;
     }
 
     .cvs__no-items {
       text-align: center;
-      padding: 15px;
-      font-size: 13px;
-    }
-
-    .cvs__placeholder {
-      filter: blur(3px);
+      padding: 10px;
+      font-size: 14px;
     }
 
     .cvs__item-row {
@@ -108,6 +108,10 @@ class CasperVirtualScroller extends LitElement {
     
     .cvs__item-row[active]:hover {
       background-color: var(--primary-color);
+    }
+
+    .cvs__placeholder {
+      filter: blur(3px);
     }
   `;
 
