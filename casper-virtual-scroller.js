@@ -70,6 +70,9 @@ class CasperVirtualScroller extends LitElement {
 
   static styles = css`
     :host {
+      --cvs-font-size: 0.875rem;
+      
+      font-size: var(--cvs-font-size);
       display: block;
       overflow: auto;
       border: 1px solid #AAA;
@@ -86,13 +89,14 @@ class CasperVirtualScroller extends LitElement {
 
     .cvs__no-items {
       text-align: center;
-      padding: 10px;
-      font-size: 14px;
+      font-size: var(--cvs-font-size);
+      padding: 0.715em;
     }
 
     .cvs__item-row {
-      padding: 5px 10px;
-      font-size: 14px;
+      font-size: var(--cvs-font-size);
+      padding: 0.3575em 0.715em;
+      white-space: nowrap;
     }
 
     .cvs__item-row:hover {
