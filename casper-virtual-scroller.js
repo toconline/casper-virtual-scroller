@@ -99,19 +99,20 @@ class CasperVirtualScroller extends LitElement {
       white-space: nowrap;
     }
 
-    .cvs__item-row:hover {
-      background-color: var(--primary-color);
-      color: white;
-      cursor: pointer;
-    }
-
     .cvs__item-row[active] {
       background-color: var(--dark-primary-color);
       color: white;
     }
-    
-    .cvs__item-row[active]:hover {
+
+    .cvs__item-row[disabled] {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .cvs__item-row:hover {
       background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
     }
 
     .cvs__placeholder {
@@ -414,7 +415,7 @@ class CasperVirtualScroller extends LitElement {
       <style>
         ${this.lineCss ? unsafeCSS(this.lineCss) : ''}
       </style>
-      <div class="cvs__item-row" @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}">
+      <div class="cvs__item-row" @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}" ?disabled=${item.disabled}>
         ${item.unsafeHTML ? unsafeHTML(item.unsafeHTML) : this.renderPlaceholder() }
       </div>
     `;
@@ -422,7 +423,7 @@ class CasperVirtualScroller extends LitElement {
 
   _renderLineSafe (item) {
     return html`
-      <div class="cvs__item-row" @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}">
+      <div class="cvs__item-row" @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}" ?disabled=${item.disabled}>
         ${this.renderLine ? this.renderLine(item) : (item[this.textProp] ? item[this.textProp] : this.renderPlaceholder()) }
       </div>
     `;
