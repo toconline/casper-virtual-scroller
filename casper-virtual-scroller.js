@@ -314,7 +314,11 @@ class CasperVirtualScroller extends LitElement {
 
     await this.updateComplete;
 
-    this.scrollToIndex(offset);
+    if (this.selectedItem) {
+      this.scrollToId(this.selectedItem);
+    } else {
+      this.scrollToIndex(offset);
+    }
   }
 
   updateHeight (height) {
