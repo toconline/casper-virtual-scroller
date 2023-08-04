@@ -277,6 +277,8 @@ class CasperVirtualScroller extends LitElement {
   //***************************************************************************************//
 
   async initialSetup () {
+    if (this._runningSetup) return;
+    this._runningSetup = true; // Lock function
     this._currentRow = 0;
     this._rowHeight = -1;
     this._setupDone = false;
@@ -288,7 +290,10 @@ class CasperVirtualScroller extends LitElement {
     this._wrapperHeight = (this.height || Math.round(Number(this.style.maxHeight.slice(0,-2))) || 300 );
 
     // If there are no items no need to calculate rowHeight, scrollTop, etc...
-    if (this._cvsItems.length === 0) return;
+    if (this._cvsItems.length === 0) {
+      this._runningSetup = false;
+      return;
+    }
 
     for (let idx = 0; idx < this._cvsItems.length; idx++) {
       this._cvsItems[idx].listId = offset + idx + Math.min(this.dataSize - (offset + this._cvsItems.length) , 0);
@@ -319,6 +324,8 @@ class CasperVirtualScroller extends LitElement {
     } else {
       this.scrollToIndex(offset);
     }
+
+    this._runningSetup = false;
   }
 
   updateHeight (height) {
