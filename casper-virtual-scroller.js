@@ -136,6 +136,8 @@ class CasperVirtualScroller extends LitElement {
   }
   get items() { return this._items; }
 
+  get renderedItemsLength() {return this._cvsItems?.length ?? 0 }
+
   constructor () {
     super();
     this._oldScrollTop = 0;
@@ -430,12 +432,14 @@ class CasperVirtualScroller extends LitElement {
   _renderLineUnsafe (item) {
     if (item.separator) return this.renderSeparator(item);
 
+    if (item.placeholder) return this.renderPlaceholder();
+
     return html`
       <style>
         ${this.lineCss ? unsafeCSS(this.lineCss) : ''}
       </style>
       <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}" ?disabled=${item.disabled}>
-        ${item.unsafeHTML ? unsafeHTML(item.unsafeHTML) : this.renderPlaceholder() }
+        ${item.unsafeHTML ? unsafeHTML(item.unsafeHTML) : item[this.textProp]}
       </div>
     `;
   }
@@ -443,17 +447,19 @@ class CasperVirtualScroller extends LitElement {
   _renderLineSafe (item) {
     if (item.separator) return this.renderSeparator(item);
 
+    if (item.placeholder) return this.renderPlaceholder();
+
     return html`
       <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}" ?disabled=${item.disabled}>
-        ${this.renderLine ? this.renderLine(item) : (item[this.textProp] ? item[this.textProp] : this.renderPlaceholder()) }
+        ${this.renderLine ? this.renderLine(item) : item[this.textProp]}
       </div>
     `;
   }
 
   _renderPlaceholder () {
     return html`
-      <div class="cvs__placeholder">
-        Loading data!
+      <div class="cvs__item-row">
+        <div class="cvs__placeholder">Loading data!</div>
       </div>
     `;
   }
