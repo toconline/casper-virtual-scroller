@@ -542,6 +542,8 @@ class CasperVirtualScroller extends LitElement {
   }
 
   _lineClicked (item, event) {
+    event.stopPropagation();
+
     this.dispatchEvent(new CustomEvent('cvs-line-selected', {
       bubbles: true,
       composed: true,
