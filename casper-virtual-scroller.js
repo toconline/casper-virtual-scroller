@@ -404,6 +404,37 @@ class CasperVirtualScroller extends LitElement {
     }
   }
 
+  async moveSelection (dir) {
+    const tmpItemList = JSON.parse(JSON.stringify(this._itemList));
+
+    let listHasUnlisted = false
+    if (this.unlistedItem && (!tmpItemList || tmpItemList.length === 0 || tmpItemList[tmpItemList.length-1].listId >= this.dataSize-1) )  {
+      listHasUnlisted = true;
+      tmpItemList.push(this.unlistedItem);
+    }
+
+    if (dir && tmpItemList && tmpItemList.length > 0) {
+      if (this.selectedItem === undefined || tmpItemList.filter(e => e.id == this.selectedItem).length === 0) {
+        this.selectedItem = tmpItemList[0].id;
+      } else {
+        let selectedIdx = 0;
+        for (let idx = 0; idx < tmpItemList.length; idx++) {
+          if (this.selectedItem == tmpItemList[idx].id) {
+            selectedIdx = idx;
+            break;
+          }
+        }
+        if (dir === 'up' && (tmpItemList[selectedIdx].listId - 1 > -1 || this.unlistedItem)) {
+          this.scrollTop -= this._rowHeight;
+          if (tmpItemList[selectedIdx-1]) this.selectedItem = tmpItemList[selectedIdx-1].id;
+        } else if (dir === 'down' && (tmpItemList[selectedIdx].listId + 1 <= this.dataSize-1 || this.unlistedItem)) {
+          if (selectedIdx+1 > 1)  this.scrollTop += this._rowHeight;
+          if (tmpItemList[selectedIdx+1]) this.selectedItem = tmpItemList[selectedIdx+1].id;
+        } 
+      }
+    }
+  }
+
   //***************************************************************************************//
   //                              ~~~ Private functions~~~                                 //
   //***************************************************************************************//
@@ -555,37 +586,6 @@ class CasperVirtualScroller extends LitElement {
     }));
   }
 
-  async _moveSelection (dir) {
-    const tmpItemList = JSON.parse(JSON.stringify(this._itemList));
-
-    let listHasUnlisted = false
-    if (this.unlistedItem && (!tmpItemList || tmpItemList.length === 0 || tmpItemList[tmpItemList.length-1].listId >= this.dataSize-1) )  {
-      listHasUnlisted = true;
-      tmpItemList.push(this.unlistedItem);
-    }
-
-    if (dir && tmpItemList && tmpItemList.length > 0) {
-      if (this.selectedItem === undefined || tmpItemList.filter(e => e.id == this.selectedItem).length === 0) {
-        this.selectedItem = tmpItemList[0].id;
-      } else {
-        let selectedIdx = 0;
-        for (let idx = 0; idx < tmpItemList.length; idx++) {
-          if (this.selectedItem == tmpItemList[idx].id) {
-            selectedIdx = idx;
-            break;
-          }
-        }
-        if (dir === 'up' && (tmpItemList[selectedIdx].listId - 1 > -1 || this.unlistedItem)) {
-          this.scrollTop -= this._rowHeight;
-          if (tmpItemList[selectedIdx-1]) this.selectedItem = tmpItemList[selectedIdx-1].id;
-        } else if (dir === 'down' && (tmpItemList[selectedIdx].listId + 1 <= this.dataSize-1 || this.unlistedItem)) {
-          if (selectedIdx+1 > 1)  this.scrollTop += this._rowHeight;
-          if (tmpItemList[selectedIdx+1]) this.selectedItem = tmpItemList[selectedIdx+1].id;
-        } 
-      }
-    }
-  }
-
   _confirmSelection () {
     let item = this._itemList.filter(e => e.id == this.selectedItem)?.[0];
     
@@ -607,10 +607,10 @@ class CasperVirtualScroller extends LitElement {
   _handleKeyPress (event) {
     switch (event.key) {
       case 'ArrowUp':
-        this._moveSelection('up');
+        this.moveSelection('up');
         break;
       case 'ArrowDown':
-        this._moveSelection('down');
+        this.moveSelection('down');
         break;
       case 'Tab':
         this._confirmSelection();
