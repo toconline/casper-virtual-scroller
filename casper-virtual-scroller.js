@@ -17,6 +17,9 @@ class CasperVirtualScroller extends LitElement {
       selectedItem: {
         type: String
       },
+      selectedItems: {
+        type: Array
+      },
       textProp: {
         type: String
       },
@@ -45,6 +48,9 @@ class CasperVirtualScroller extends LitElement {
         type: Number
       },
       unsafeRender: {
+        type: Boolean
+      },
+      multiSelect: {
         type: Boolean
       },
       delaySetup: {
@@ -144,6 +150,8 @@ class CasperVirtualScroller extends LitElement {
     this._scrollDirection = 'none';
     this.idProp = 'id';
     this.textProp = 'name';
+    this.multiSelect = false;
+    this.selectedItems = [];
   }
 
   connectedCallback () {
@@ -414,22 +422,22 @@ class CasperVirtualScroller extends LitElement {
     }
 
     if (dir && tmpItemList && tmpItemList.length > 0) {
-      if (this.selectedItem === undefined || tmpItemList.filter(e => e.id == this.selectedItem).length === 0) {
-        this.selectedItem = tmpItemList[0].id;
+      if (this.selectedItem === undefined || tmpItemList.filter(e => e[this.idProp] == this.selectedItem).length === 0) {
+        this.selectedItem = tmpItemList[0][this.idProp];
       } else {
         let selectedIdx = 0;
         for (let idx = 0; idx < tmpItemList.length; idx++) {
-          if (this.selectedItem == tmpItemList[idx].id) {
+          if (this.selectedItem == tmpItemList[idx][this.idProp]) {
             selectedIdx = idx;
             break;
           }
         }
         if (dir === 'up' && (tmpItemList[selectedIdx].listId - 1 > -1 || this.unlistedItem)) {
           this.scrollTop -= this._rowHeight;
-          if (tmpItemList[selectedIdx-1]) this.selectedItem = tmpItemList[selectedIdx-1].id;
+          if (tmpItemList[selectedIdx-1]) this.selectedItem = tmpItemList[selectedIdx-1][this.idProp];
         } else if (dir === 'down' && (tmpItemList[selectedIdx].listId + 1 <= this.dataSize-1 || this.unlistedItem)) {
           if (selectedIdx+1 > 1)  this.scrollTop += this._rowHeight;
-          if (tmpItemList[selectedIdx+1]) this.selectedItem = tmpItemList[selectedIdx+1].id;
+          if (tmpItemList[selectedIdx+1]) this.selectedItem = tmpItemList[selectedIdx+1][this.idProp];
         } 
       }
     }
@@ -465,11 +473,18 @@ class CasperVirtualScroller extends LitElement {
 
     if (item.placeholder) return this.renderPlaceholder();
 
+    let active = false;
+    if (!this.multiSelect) {
+      active = this.selectedItem && item[this.idProp] == this.selectedItem;
+    } else {
+      active = this.selectedItems.includes(item[this.idProp]);
+    }
+
     return html`
       <style>
         ${this.lineCss ? unsafeCSS(this.lineCss) : ''}
       </style>
-      <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}" ?disabled=${item.disabled}>
+      <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${active}" ?disabled=${item.disabled}>
         ${item.unsafeHTML ? unsafeHTML(item.unsafeHTML) : item[this.textProp]}
       </div>
     `;
@@ -480,8 +495,15 @@ class CasperVirtualScroller extends LitElement {
 
     if (item.placeholder) return this.renderPlaceholder();
 
+    let active = false;
+    if (!this.multiSelect) {
+      active = this.selectedItem && item[this.idProp] == this.selectedItem;
+    } else {
+      active = this.selectedItems.includes(item[this.idProp]);
+    }
+
     return html`
-      <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${this.selectedItem && item[this.idProp] == this.selectedItem}" ?disabled=${item.disabled}>
+      <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${active}" ?disabled=${item.disabled}>
         ${this.renderLine ? this.renderLine(item) : item[this.textProp]}
       </div>
     `;
@@ -587,7 +609,7 @@ class CasperVirtualScroller extends LitElement {
   }
 
   _confirmSelection () {
-    let item = this._itemList.filter(e => e.id == this.selectedItem)?.[0];
+    let item = this._itemList.filter(e => e[this.idProp] == this.selectedItem)?.[0];
     
     if (!item && this.unlistedItem) item = this.unlistedItem;
 
@@ -596,7 +618,7 @@ class CasperVirtualScroller extends LitElement {
         bubbles: true,
         composed: true,
         detail: {
-          id: item.id,
+          id: item[this.idProp],
           name: item?.[this.textProp],
           item: item
         }
