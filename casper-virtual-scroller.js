@@ -351,15 +351,21 @@ class CasperVirtualScroller extends LitElement {
         <div class="cvs__bottom-padding"></div>
         ${this.unlistedItem ? this._renderLine(this.unlistedItem) : ''}
       </div>
+      ${this.multiSelect ? html`
       <div class="cvs__actions">
         <ul class="cvs__labels-list">
-          <li class="cvs__label">
-            <casper-icon-button icon="fa-light:times-circle" class="cvs__label-icon"></casper-icon-button>
-            <span class="cvs__label-text">1</span>
-          </li>
+          ${repeat(this.selectedItems, a => a.listId, (itemId,index) => {
+            const item = this.items.find(e => e[this.idProp] == itemId);
+            return item ? html`
+            <li class="cvs__label" tooltip="${item[this.textProp]}">
+              <casper-icon-button icon="fa-light:times-circle" class="cvs__label-icon"></casper-icon-button>
+              <span class="cvs__label-text">${item[this.textProp]}</span>
+            </li>` : '';
+          })}
         </ul>
         <button class="cvs__close-button">Concluído</button>
       </div>
+      ` : ''}
     `;
   }
 
