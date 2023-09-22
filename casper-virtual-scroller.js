@@ -2,6 +2,7 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import 'wc-spinners/dist/spring-spinner.js';
+import '@cloudware-casper/casper-icons/casper-icon-button.js';
 
 class CasperVirtualScroller extends LitElement {
 
@@ -127,6 +128,101 @@ class CasperVirtualScroller extends LitElement {
 
     .cvs__placeholder {
       filter: blur(3px);
+    }
+
+    .cvs__actions {
+      position: absolute;
+      width: 100%;
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.35em 0.5em;
+      box-sizing: border-box;
+      gap: 1em;
+      background-color: #FFF;
+      box-shadow: rgba(0, 0, 0, 0.2) 0px -4px 20px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .cvs__labels-list {
+      display: flex;
+      overflow-x: auto;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      gap: 0.35em;
+      color: var(--secondary-text-color);
+      /* Hides scrollbar for Edge and Firefox */
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Hides scrollbar for Chrome, Safari and Opera */
+    .cvs__labels-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cvs__label {
+      font-size: 0.94em;
+      padding: 0.16em 0.5em 0.16em 0.3em;
+      display: flex;
+      align-items: center;
+      gap: 0.25em;
+      border-radius: 2em;
+      border: 0.04em solid;
+      transition: all 0.5s;
+    }
+
+    .cvs__label:hover {
+      background-color: rgba(var(--primary-color-rgb), 0.1);
+      color: var(--primary-color);
+      cursor: pointer;
+    }
+
+    .cvs__label-icon {
+      flex-shrink: 0;
+      background-color: transparent;
+      color: inherit;
+      border: none;
+      padding: 0px;
+      outline: none;
+      font-size: 1em;
+      width: 1.1em;
+      height: 1.1em;
+    }
+
+    .cvs__label-icon:hover {
+      background-color: var(--primary-color);
+      color: #FFF;
+    }
+
+    .cvs__label-text {
+      max-width: 7em;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .cvs__close-button {
+      font-family: inherit;
+      background-color: var(--button-primary-color);
+      border: 1px solid var(--button-primary-color);
+      color: #FFF;
+      font-size: 0.785em;
+      font-weight: 600;
+      padding: 0.5em 1em;
+      border-radius: 0.4em;
+      outline: none;
+      text-transform: uppercase;
+      transition: all 0.5s;
+    }
+
+    .cvs__close-button:hover {
+      cursor: pointer;
+      background-color: var(--light-primary-color);
+      color: var(--button-primary-color);
     }
   `;
 
@@ -254,6 +350,15 @@ class CasperVirtualScroller extends LitElement {
           ${repeat(this._itemList, a => a.listId, this._renderLine.bind(this))}
         <div class="cvs__bottom-padding"></div>
         ${this.unlistedItem ? this._renderLine(this.unlistedItem) : ''}
+      </div>
+      <div class="cvs__actions">
+        <ul class="cvs__labels-list">
+          <li class="cvs__label">
+            <casper-icon-button icon="fa-light:times-circle" class="cvs__label-icon"></casper-icon-button>
+            <span class="cvs__label-text">1</span>
+          </li>
+        </ul>
+        <button class="cvs__close-button">Concluído</button>
       </div>
     `;
   }
