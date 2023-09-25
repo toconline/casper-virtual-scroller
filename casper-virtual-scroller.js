@@ -248,6 +248,9 @@ class CasperVirtualScroller extends LitElement {
     this.textProp = 'name';
     this.multiSelect = false;
     this.selectedItems = [];
+
+    this.okButtonHandler = () => {return};
+    this.okButtonLabel = 'OK';
   }
 
   connectedCallback () {
@@ -357,13 +360,13 @@ class CasperVirtualScroller extends LitElement {
           ${repeat(this.selectedItems, a => a.listId, (itemId,index) => {
             const item = this.items.find(e => e[this.idProp] == itemId);
             return item ? html`
-            <li class="cvs__label" tooltip="${item[this.textProp]}">
-              <casper-icon-button icon="fa-light:times-circle" class="cvs__label-icon"></casper-icon-button>
+            <li class="cvs__label" tooltip="${item[this.textProp]}" @click="${this._labelClicked}" data-item="${itemId}">
+              <casper-icon-button icon="fa-light:times-circle" class="cvs__label-icon" @click="${this._removeValueClicked}"></casper-icon-button>
               <span class="cvs__label-text">${item[this.textProp]}</span>
             </li>` : '';
           })}
         </ul>
-        <button class="cvs__close-button">Concluído</button>
+        <button class="cvs__close-button" @click=${this.okButtonHandler}>${this.okButtonLabel}</button>
       </div>
       ` : ''}
     `;
@@ -510,14 +513,30 @@ class CasperVirtualScroller extends LitElement {
     return this._currentRow;
   }
 
-  scrollToIndex (idx) {
-    this.scrollTop = Math.max((idx * this._rowHeight) - (this._rowHeight * 2), 0);
+  scrollToIndex (idx, smooth=false) {
+    if (smooth) {
+      this.scroll({
+        top: Math.max((idx * this._rowHeight) - (this._rowHeight * 2), 0),
+        behavior: "smooth",
+      });
+    } else {
+      this.scrollTop = Math.max((idx * this._rowHeight) - (this._rowHeight * 2), 0);
+    }
   }
 
   scrollToId (id) {
     for (let idx = 0; idx < this._cvsItems.length; idx++) {
       if (this._cvsItems[idx][this.idProp] == id) {
         this.scrollToIndex(this._cvsItems[idx].listId);
+        break;
+      }
+    }
+  }
+
+  smoothScrollToId (id) {
+    for (let idx = 0; idx < this._cvsItems.length; idx++) {
+      if (this._cvsItems[idx][this.idProp] == id) {
+        this.scrollToIndex(this._cvsItems[idx].listId, true);
         break;
       }
     }
@@ -717,6 +736,27 @@ class CasperVirtualScroller extends LitElement {
         item: item
       }
     }));
+  }
+
+  _removeValueClicked (event) {
+    if (!this.multiSelect) return;
+    event.stopPropagation();
+
+    const item = event.currentTarget.parentElement.dataset.item;
+    this.dispatchEvent(new CustomEvent('cvs-line-selected', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        id: item
+      }
+    }));
+  }
+
+  _labelClicked (event) {
+    event.stopPropagation();
+
+    const item = event.currentTarget.dataset.item;
+    this.smoothScrollToId(item);
   }
 
   _confirmSelection () {
