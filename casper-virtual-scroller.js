@@ -133,10 +133,10 @@ class CasperVirtualScroller extends LitElement {
     .cvs__actions {
       position: absolute;
       width: 100%;
+      max-height: 50%;
       position: sticky;
       bottom: 0;
       display: flex;
-      align-items: center;
       justify-content: space-between;
       padding: 0.35em 0.5em;
       box-sizing: border-box;
@@ -146,26 +146,36 @@ class CasperVirtualScroller extends LitElement {
       border-top: 1px solid rgba(0, 0, 0, 0.1);
     }
 
-    .cvs__labels-list {
+    .cvs__labels-wrapper {
+      overflow-y: auto;
       display: flex;
-      overflow-x: auto;
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-      gap: 0.35em;
-      color: var(--secondary-text-color);
+      flex-direction: column;
       /* Hides scrollbar for Edge and Firefox */
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
 
     /* Hides scrollbar for Chrome, Safari and Opera */
-    .cvs__labels-list::-webkit-scrollbar {
+    .cvs__labels-wrapper::-webkit-scrollbar {
       display: none;
+    }
+
+    .cvs__labels-list {
+      flex-grow: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      gap: 0.35em;
+      color: var(--secondary-text-color);
     }
 
     .cvs__label {
       font-size: 0.94em;
+      width: min(100%, 8em);
+      flex-grow: 1;
       padding: 0.16em 0.5em 0.16em 0.3em;
       display: flex;
       align-items: center;
@@ -199,13 +209,13 @@ class CasperVirtualScroller extends LitElement {
     }
 
     .cvs__label-text {
-      max-width: 7em;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
 
     .cvs__close-button {
+      align-self: center;
       font-family: inherit;
       background-color: var(--button-primary-color);
       border: 1px solid var(--button-primary-color);
@@ -356,16 +366,18 @@ class CasperVirtualScroller extends LitElement {
       </div>
       ${this.multiSelect ? html`
       <div class="cvs__actions">
-        <ul class="cvs__labels-list">
-          ${repeat(this.selectedItems, a => a.listId, (itemId,index) => {
-            const item = this.items.find(e => e[this.idProp] == itemId);
-            return item ? html`
-            <li class="cvs__label" tooltip="${item[this.textProp]}" @click="${this._labelClicked}" data-item="${itemId}">
-              <casper-icon-button icon="fa-light:times-circle" class="cvs__label-icon" @click="${this._removeValueClicked}"></casper-icon-button>
-              <span class="cvs__label-text">${item[this.textProp]}</span>
-            </li>` : '';
-          })}
-        </ul>
+        <div class="cvs__labels-wrapper">
+          <ul class="cvs__labels-list">
+            ${repeat(this.selectedItems, a => a.listId, (itemId,index) => {
+              const item = this.items.find(e => e[this.idProp] == itemId);
+              return item ? html`
+              <li class="cvs__label" tooltip="${item[this.textProp]}" @click="${this._labelClicked}" data-item="${itemId}">
+                <casper-icon-button icon="fa-light:times-circle" class="cvs__label-icon" @click="${this._removeValueClicked}"></casper-icon-button>
+                <span class="cvs__label-text">${item[this.textProp]}</span>
+              </li>` : '';
+            })}
+          </ul>
+        </div>
         <button class="cvs__close-button" @click=${this.okButtonHandler}>${this.okButtonLabel}</button>
       </div>
       ` : ''}
