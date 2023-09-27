@@ -663,7 +663,7 @@ class CasperVirtualScroller extends LitElement {
     const active = this.selectedItem && item[this.idProp] == this.selectedItem;
     let selected = false;
     if (this.multiSelect) {
-      selected =this.selectedItems.includes(item[this.idProp]);
+      selected = this.selectedItems.includes(String(item[this.idProp]));
     }
 
     return html`
@@ -684,7 +684,7 @@ class CasperVirtualScroller extends LitElement {
     const active = this.selectedItem && item[this.idProp] == this.selectedItem;
     let selected = false;
     if (this.multiSelect) {
-      selected =this.selectedItems.includes(item[this.idProp]);
+      selected = this.selectedItems.includes(String(item[this.idProp]));
     }
 
     return html`
