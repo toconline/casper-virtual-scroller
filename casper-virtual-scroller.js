@@ -52,7 +52,9 @@ class CasperVirtualScroller extends LitElement {
         type: Boolean
       },
       multiSelect: {
-        type: Boolean
+        type: Boolean,
+        reflect: true,
+        attribute: 'multi-select'
       },
       delaySetup: {
         type: Boolean
@@ -81,7 +83,7 @@ class CasperVirtualScroller extends LitElement {
   static styles = css`
     :host {
       --cvs-font-size: 0.875rem;
-      
+      overscroll-behavior: contain;
       font-size: var(--cvs-font-size);
       display: block;
       overflow: auto;
@@ -130,6 +132,29 @@ class CasperVirtualScroller extends LitElement {
       filter: blur(3px);
     }
 
+    :host([multi-select]) .cvs__item-row[selectable] {
+      background: #fafafa;
+    }
+
+    :host([multi-select]) .cvs__item-row[selectable][selected] {
+      color: var(--primary-color);
+    }
+
+    :host([multi-select]) .cvs__item-row[selectable]:hover {
+      color: var(--status-green);
+    }
+
+    :host([multi-select]) .cvs__item-row[selectable][active] {
+      color: var(--status-green);
+    }
+
+    :host([multi-select]) .cvs__item-row[selectable][active]:hover {
+      color: var(--status-red);
+    }
+    :host([multi-select]) .cvs__item-row[selectable][active][selected] {
+      color: var(--status-red);
+    }
+
     .cvs__actions {
       position: absolute;
       width: 100%;
@@ -147,6 +172,8 @@ class CasperVirtualScroller extends LitElement {
     }
 
     .cvs__labels-wrapper {
+      flex-grow: 1;
+      overscroll-behavior: contain;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -585,6 +612,24 @@ class CasperVirtualScroller extends LitElement {
     }
   }
 
+  confirmSelection () {
+    let item = this._itemList.filter(e => e[this.idProp] == this.selectedItem)?.[0];
+    
+    if (!item && this.unlistedItem) item = this.unlistedItem;
+
+    if (item) {
+      this.dispatchEvent(new CustomEvent('cvs-line-selected', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          id: item[this.idProp],
+          name: item?.[this.textProp],
+          item: item
+        }
+      }));
+    }
+  }
+
   //***************************************************************************************//
   //                              ~~~ Private functions~~~                                 //
   //***************************************************************************************//
@@ -615,18 +660,17 @@ class CasperVirtualScroller extends LitElement {
 
     if (item.placeholder) return this.renderPlaceholder();
 
-    let active = false;
-    if (!this.multiSelect) {
-      active = this.selectedItem && item[this.idProp] == this.selectedItem;
-    } else {
-      active = this.selectedItems.includes(item[this.idProp]);
+    const active = this.selectedItem && item[this.idProp] == this.selectedItem;
+    let selected = false;
+    if (this.multiSelect) {
+      selected =this.selectedItems.includes(item[this.idProp]);
     }
 
     return html`
       <style>
         ${this.lineCss ? unsafeCSS(this.lineCss) : ''}
       </style>
-      <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${active}" ?disabled=${item.disabled}>
+      <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${active}" ?selected="${selected}" ?disabled=${item.disabled}>
         ${item.unsafeHTML ? unsafeHTML(item.unsafeHTML) : item[this.textProp]}
       </div>
     `;
@@ -637,15 +681,14 @@ class CasperVirtualScroller extends LitElement {
 
     if (item.placeholder) return this.renderPlaceholder();
 
-    let active = false;
-    if (!this.multiSelect) {
-      active = this.selectedItem && item[this.idProp] == this.selectedItem;
-    } else {
-      active = this.selectedItems.includes(item[this.idProp]);
+    const active = this.selectedItem && item[this.idProp] == this.selectedItem;
+    let selected = false;
+    if (this.multiSelect) {
+      selected =this.selectedItems.includes(item[this.idProp]);
     }
 
     return html`
-      <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${active}" ?disabled=${item.disabled}>
+      <div class="cvs__item-row" selectable @click="${this._lineClicked.bind(this, item)}" ?active="${active}" ?selected="${selected}" ?disabled=${item.disabled}>
         ${this.renderLine ? this.renderLine(item) : item[this.textProp]}
       </div>
     `;
@@ -771,24 +814,6 @@ class CasperVirtualScroller extends LitElement {
     this.smoothScrollToId(item);
   }
 
-  _confirmSelection () {
-    let item = this._itemList.filter(e => e[this.idProp] == this.selectedItem)?.[0];
-    
-    if (!item && this.unlistedItem) item = this.unlistedItem;
-
-    if (item) {
-      this.dispatchEvent(new CustomEvent('cvs-line-selected', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          id: item[this.idProp],
-          name: item?.[this.textProp],
-          item: item
-        }
-      }));
-    }
-  }
-
   _handleKeyPress (event) {
     switch (event.key) {
       case 'ArrowUp':
@@ -798,10 +823,10 @@ class CasperVirtualScroller extends LitElement {
         this.moveSelection('down');
         break;
       case 'Tab':
-        this._confirmSelection();
+        this.multiSelect ? this.okButtonHandler() : this.confirmSelection();
         break;
       case 'Enter':
-        this._confirmSelection();
+        this.confirmSelection();
         break;
       default:
         break;
