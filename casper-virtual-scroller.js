@@ -83,12 +83,13 @@ class CasperVirtualScroller extends LitElement {
   static styles = css`
     :host {
       --cvs-font-size: 0.875rem;
+      --cvs-background-color: #FFF;
       overscroll-behavior: contain;
       font-size: var(--cvs-font-size);
       display: block;
       overflow: auto;
       border: 1px solid #AAA;
-      background-color: white;
+      background-color: var(--cvs-background-color);
       border-radius: 0 0 3px 3px;
       transition: width 250ms linear;
       box-shadow: rgb(25 59 103 / 5%) 0px 0px 0px 1px, rgb(28 55 90 / 16%) 0px 2px 6px -1px, rgb(28 50 79 / 38%) 0px 8px 24px -4px;
@@ -110,9 +111,10 @@ class CasperVirtualScroller extends LitElement {
       padding: 0.3575em 0.715em;
       white-space: nowrap;
       cursor: default;
+      transition: color 250ms, background-color 250ms;
     }
 
-    .cvs__item-row[selectable][active] {
+    :host(:not([multi-select])) .cvs__item-row[selectable][active] {
       background-color: var(--dark-primary-color);
       color: white;
     }
@@ -133,26 +135,43 @@ class CasperVirtualScroller extends LitElement {
     }
 
     :host([multi-select]) .cvs__item-row[selectable] {
-      background: #fafafa;
+      position: relative;
+      box-sizing: border-box;
+      border: solid 3px var(--cvs-background-color);
+      border-radius: 6px;
     }
 
     :host([multi-select]) .cvs__item-row[selectable][selected] {
-      color: var(--primary-color);
+      background-color: var(--dark-primary-color);
+      color: #FFF;
     }
 
-    :host([multi-select]) .cvs__item-row[selectable]:hover {
-      color: var(--status-green);
+    :host([multi-select]) .cvs__item-row[selectable]:hover,
+    :host([multi-select]) .cvs__item-row[selectable][selected]:hover {
+      background-color: var(--primary-color);
+      color: #FFF;
     }
 
-    :host([multi-select]) .cvs__item-row[selectable][active] {
-      color: var(--status-green);
+    :host([multi-select]) .cvs__item-row[selectable]::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      box-sizing: border-box;
+      z-index: 1;
+      pointer-events: none;
+      border-radius: 2px;
+      box-shadow: white 0px 0px 0px 1px inset;
+      border: solid 1px var(--primary-color);
+      outline: solid 2px rgba(var(--primary-color-rgb), 0.5);
+      transition: opacity 250ms;
     }
 
-    :host([multi-select]) .cvs__item-row[selectable][active]:hover {
-      color: var(--status-red);
-    }
-    :host([multi-select]) .cvs__item-row[selectable][active][selected] {
-      color: var(--status-red);
+    :host([multi-select]) .cvs__item-row[selectable][active]::after {
+      opacity: 1;
     }
 
     .cvs__actions {
