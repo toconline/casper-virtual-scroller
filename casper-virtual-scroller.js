@@ -174,27 +174,25 @@ class CasperVirtualScroller extends LitElement {
     }
 
     .cvs__actions {
-      position: absolute;
       width: 100%;
       max-height: 50%;
       position: sticky;
       bottom: 0;
       display: flex;
-      justify-content: space-between;
       padding: 0.35em 0.5em;
       box-sizing: border-box;
-      gap: 1em;
       background-color: #FFF;
       box-shadow: rgba(0, 0, 0, 0.2) 0px -4px 20px;
       border-top: 1px solid rgba(0, 0, 0, 0.1);
-      overscroll-behavior: contain;
-      overflow-y: auto;
+      overflow: hidden;
     }
 
-    .cvs__labels-wrapper {
+    .cvs__actions-inner {
       flex-grow: 1;
       display: flex;
-      flex-direction: column;
+      gap: 1em;
+      overscroll-behavior: contain;
+      overflow-y: auto;
     }
 
     .cvs__labels-list {
@@ -411,7 +409,7 @@ class CasperVirtualScroller extends LitElement {
       </div>
       ${this.multiSelect ? html`
         <div class="cvs__actions">
-          <div class="cvs__labels-wrapper">
+          <div class="cvs__actions-inner">
             <ul class="cvs__labels-list">
               ${repeat(this.selectedItems, a => a.listId, (itemId,index) => {
                 const item = this.items.find(e => e[this.idProp] == itemId);
@@ -423,9 +421,9 @@ class CasperVirtualScroller extends LitElement {
                 ` : '';
               })}
             </ul>
-          </div>
-          <div class="cvs__buttons-container">
-            <button class="cvs__close-button" @click=${this.okButtonHandler}>${this.okButtonLabel}</button>
+            <div class="cvs__buttons-container">
+              <button class="cvs__close-button" @click=${this.okButtonHandler}>${this.okButtonLabel}</button>
+            </div>
           </div>
         </div>
       ` : ''}
