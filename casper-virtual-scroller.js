@@ -161,7 +161,6 @@ class CasperVirtualScroller extends LitElement {
       height: 100%;
       opacity: 0;
       box-sizing: border-box;
-      z-index: 1;
       pointer-events: none;
       border-radius: 2px;
       box-shadow: white 0px 0px 0px 1px inset;
@@ -253,10 +252,9 @@ class CasperVirtualScroller extends LitElement {
     }
 
     .cvs__close-button {
-      align-self: center;
+      align-self: flex-end;
       position: sticky;
       top: 50%;
-      transform: translateY(-50%);
       font-family: inherit;
       background-color: var(--button-primary-color);
       border: 1px solid var(--button-primary-color);
