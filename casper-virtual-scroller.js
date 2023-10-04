@@ -188,22 +188,14 @@ class CasperVirtualScroller extends LitElement {
       background-color: #FFF;
       box-shadow: rgba(0, 0, 0, 0.2) 0px -4px 20px;
       border-top: 1px solid rgba(0, 0, 0, 0.1);
+      overscroll-behavior: contain;
+      overflow-y: auto;
     }
 
     .cvs__labels-wrapper {
       flex-grow: 1;
-      overscroll-behavior: contain;
-      overflow-y: auto;
       display: flex;
       flex-direction: column;
-      /* Hides scrollbar for Edge and Firefox */
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    /* Hides scrollbar for Chrome, Safari and Opera */
-    .cvs__labels-wrapper::-webkit-scrollbar {
-      display: none;
     }
 
     .cvs__labels-list {
@@ -220,7 +212,7 @@ class CasperVirtualScroller extends LitElement {
 
     .cvs__label {
       font-size: 0.94em;
-      width: min(100%, 8em);
+      width: min(100%, 7.5em);
       flex-grow: 1;
       padding: 0.16em 0.5em 0.16em 0.3em;
       display: flex;
@@ -262,6 +254,9 @@ class CasperVirtualScroller extends LitElement {
 
     .cvs__close-button {
       align-self: center;
+      position: sticky;
+      top: 50%;
+      transform: translateY(-50%);
       font-family: inherit;
       background-color: var(--button-primary-color);
       border: 1px solid var(--button-primary-color);
