@@ -251,10 +251,16 @@ class CasperVirtualScroller extends LitElement {
       text-overflow: ellipsis;
     }
 
-    .cvs__close-button {
-      align-self: flex-end;
+    .cvs__buttons-container {
+      align-self: stretch;
       position: sticky;
-      top: 50%;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .cvs__close-button {
       font-family: inherit;
       background-color: var(--button-primary-color);
       border: 1px solid var(--button-primary-color);
@@ -404,21 +410,24 @@ class CasperVirtualScroller extends LitElement {
         ${this.unlistedItem ? this._renderLine(this.unlistedItem) : ''}
       </div>
       ${this.multiSelect ? html`
-      <div class="cvs__actions">
-        <div class="cvs__labels-wrapper">
-          <ul class="cvs__labels-list">
-            ${repeat(this.selectedItems, a => a.listId, (itemId,index) => {
-              const item = this.items.find(e => e[this.idProp] == itemId);
-              return item ? html`
-              <li class="cvs__label" tooltip="${item[this.textProp]}" @click="${this._labelClicked}" data-item="${itemId}">
-                <casper-icon-button icon="fa-light:times-circle" class="cvs__label-icon" @click="${this._removeValueClicked}"></casper-icon-button>
-                <span class="cvs__label-text">${item[this.textProp]}</span>
-              </li>` : '';
-            })}
-          </ul>
+        <div class="cvs__actions">
+          <div class="cvs__labels-wrapper">
+            <ul class="cvs__labels-list">
+              ${repeat(this.selectedItems, a => a.listId, (itemId,index) => {
+                const item = this.items.find(e => e[this.idProp] == itemId);
+                return item ? html`
+                  <li class="cvs__label" tooltip="${item[this.textProp]}" @click="${this._labelClicked}" data-item="${itemId}">
+                    <casper-icon-button icon="fa-light:times-circle" class="cvs__label-icon" @click="${this._removeValueClicked}"></casper-icon-button>
+                    <span class="cvs__label-text">${item[this.textProp]}</span>
+                  </li>
+                ` : '';
+              })}
+            </ul>
+          </div>
+          <div class="cvs__buttons-container">
+            <button class="cvs__close-button" @click=${this.okButtonHandler}>${this.okButtonLabel}</button>
+          </div>
         </div>
-        <button class="cvs__close-button" @click=${this.okButtonHandler}>${this.okButtonLabel}</button>
-      </div>
       ` : ''}
     `;
   }
