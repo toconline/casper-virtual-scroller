@@ -84,12 +84,14 @@ class CasperVirtualScroller extends LitElement {
     :host {
       --cvs-font-size: 0.875rem;
       --cvs-background-color: #FFF;
+      --cvs-color: var(--primary-text-color, #444);
       overscroll-behavior: contain;
       font-size: var(--cvs-font-size);
       display: block;
       overflow: auto;
       border: 1px solid #AAA;
       background-color: var(--cvs-background-color);
+      color: var(--cvs-color);
       border-radius: 0 0 3px 3px;
       transition: width 250ms linear;
       box-shadow: rgb(25 59 103 / 5%) 0px 0px 0px 1px, rgb(28 55 90 / 16%) 0px 2px 6px -1px, rgb(28 50 79 / 38%) 0px 8px 24px -4px;
