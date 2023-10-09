@@ -96,6 +96,7 @@ class CasperVirtualScroller extends LitElement {
     }
 
     .cvs__wrapper {
+      font-size: var(--cvs-font-size);
       display: grid;
       white-space: nowrap;
     }
@@ -134,11 +135,19 @@ class CasperVirtualScroller extends LitElement {
       filter: blur(3px);
     }
 
+
+    /* MULTI-SELECT */
+
+    :host([multi-select]) {
+      --cvs-multi-border-width: 0.08em;
+      --cvs-multi-outline-width: 0.16em;
+    }
+
     :host([multi-select]) .cvs__item-row[selectable] {
       position: relative;
       box-sizing: border-box;
-      border: solid 3px var(--cvs-background-color);
-      border-radius: 6px;
+      border: solid calc(var(--cvs-multi-border-width) + var(--cvs-multi-outline-width)) var(--cvs-background-color);
+      border-radius: calc(5 * var(--cvs-multi-outline-width));
     }
 
     :host([multi-select]) .cvs__item-row[selectable][selected] {
@@ -162,10 +171,10 @@ class CasperVirtualScroller extends LitElement {
       opacity: 0;
       box-sizing: border-box;
       pointer-events: none;
-      border-radius: 2px;
-      box-shadow: white 0px 0px 0px 1px inset;
-      border: solid 1px var(--primary-color);
-      outline: solid 2px rgba(var(--primary-color-rgb), 0.5);
+      border-radius: var(--cvs-multi-outline-width);
+      box-shadow: white 0px 0px 0px var(--cvs-multi-border-width) inset;
+      border: solid var(--cvs-multi-border-width) var(--primary-color);
+      outline: solid var(--cvs-multi-outline-width) rgba(var(--primary-color-rgb), 0.5);
       transition: opacity 250ms;
     }
 
@@ -174,6 +183,7 @@ class CasperVirtualScroller extends LitElement {
     }
 
     .cvs__actions {
+      font-size: var(--cvs-font-size);
       width: 100%;
       max-height: 50%;
       position: sticky;
@@ -182,8 +192,8 @@ class CasperVirtualScroller extends LitElement {
       padding: 0.35em 0.5em;
       box-sizing: border-box;
       background-color: #FFF;
-      box-shadow: rgba(0, 0, 0, 0.2) 0px -4px 20px;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: rgba(0, 0, 0, 0.2) 0px -0.16em 1.42em;
+      border-top: 0.08em solid rgba(0, 0, 0, 0.1);
       overflow: hidden;
     }
 
@@ -196,6 +206,7 @@ class CasperVirtualScroller extends LitElement {
     }
 
     .cvs__labels-list {
+      font-size: 0.94em;
       flex-grow: 1;
       display: flex;
       flex-wrap: wrap;
@@ -208,7 +219,6 @@ class CasperVirtualScroller extends LitElement {
     }
 
     .cvs__label {
-      font-size: 0.94em;
       width: min(100%, 7.5em);
       flex-grow: 1;
       padding: 0.16em 0.5em 0.16em 0.3em;
@@ -250,6 +260,7 @@ class CasperVirtualScroller extends LitElement {
     }
 
     .cvs__buttons-container {
+      font-size: 0.785em;
       align-self: stretch;
       position: sticky;
       top: 0;
@@ -260,11 +271,11 @@ class CasperVirtualScroller extends LitElement {
 
     .cvs__close-button {
       font-family: inherit;
-      background-color: var(--button-primary-color);
-      border: 1px solid var(--button-primary-color);
-      color: #FFF;
-      font-size: 0.785em;
+      font-size: inherit;
       font-weight: 600;
+      background-color: var(--button-primary-color);
+      border: 0.09em solid var(--button-primary-color);
+      color: #FFF;
       padding: 0.5em 1em;
       border-radius: 0.4em;
       outline: none;
