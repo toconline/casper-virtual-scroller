@@ -147,6 +147,10 @@ class CasperVirtualScroller extends LitElement {
       position: relative;
       box-sizing: border-box;
       border: solid calc(var(--cvs-multi-border-width) + var(--cvs-multi-outline-width)) var(--cvs-background-color);
+      border-radius: calc(2.5 * var(--cvs-multi-outline-width));
+    }
+
+    :host([multi-select]) .cvs__item-row[selectable][active] {
       border-radius: calc(5 * var(--cvs-multi-outline-width));
     }
 
