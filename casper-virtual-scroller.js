@@ -19,7 +19,7 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import 'wc-spinners/dist/spring-spinner.js';
-import '@cloudware-casper/casper-icons/casper-icon-button.js';
+import '@toconline/casper-icons/casper-icon-button.js';
 
 class CasperVirtualScroller extends LitElement {
 
